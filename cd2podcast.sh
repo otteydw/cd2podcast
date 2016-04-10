@@ -2,7 +2,15 @@
 
 PATH="${PATH}"
 
-uname | grep -q "CYGWIN" && HOME="/cygdrive/c/cd2podcast" || HOME="c:/cd2podcast"
+uname | grep -q "CYGWIN" && OS="CYGWIN" || OS="WINDOWS"
+
+if [ "${OS}" = "CYGWIN" ]; then
+	HOME="/cygdrive/c/cd2podcast"
+	DEV="0,1,0"
+else
+	HOME="c:/cd2podcast"
+fi
+
 URL="http://www.enjoydaybreak.com/"
 ALBUM="Daybreak Community Church"
 COMMENT="${ALBUM} - ${URL}"
@@ -112,10 +120,19 @@ FILENAME="$TIMESTAMP-`echo $TITLE | sed -e 's| |\_|g' | sed -e 's|\_\-\_|\-|g'`"
 if [ -z $WAV ]; then
 	if [ -z $TRACK ]; then
 		# No tracks specified, lets rip 'em all!
-		cdda2wav -B --no-infofile ${HOME}/${FILENAME}.wav || die "Error extracting from CD"
+		if [ "${OS}" = "CYGWIN" ]; then
+			cdda2wav -B -D ${DEV} --no-infofile ${HOME}/${FILENAME}.wav || die "Error extracting from CD"
+		else
+			cdda2wav -B --no-infofile ${HOME}/${FILENAME}.wav || die "Error extracting from CD"
+		fi
 	else
 		# Rip only the track specified
-		cdda2wav -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
+		if [ "${OS}" = "CYGWIN" ]; then
+			cdda2wav -D ${DEV} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
+		else
+			cdda2wav -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
+		fi
+		
 	fi
 else
 	if [ "${WAV}" != "${FILENAME}.wav" ]; then
@@ -132,8 +149,8 @@ eject
 
 case $ARTIST in
 	"David Hakes" ) INTROFILE="${HOME}/intro/Intro_Hakes-Pastor.wav";;
-	"Kevin Grando" ) INTROFILE="${HOME}/intro/Intro_Grando.wav";;
-	"Dan Houck" ) INTROFILE="${HOME}/intro/Intro_Houck.wav";;
+	#"Kevin Grando" ) INTROFILE="${HOME}/intro/Intro_Grando.wav";;
+	#"Dan Houck" ) INTROFILE="${HOME}/intro/Intro_Houck.wav";;
 	* ) INTROFILE="${HOME}/intro/Intro_Generic.wav";;
 esac
 
@@ -158,10 +175,14 @@ cp ${INTROFILE} ${FILENAME}-intro.wav
 # Cross-fade the intro with the audio
 FADE1="${FILENAME}-intro.wav"
 FADE2="${FILENAME}-no_silence.wav"
+
+# Weird workaround
+[ "${OS}" != "CYGWIN" ] && chmod 664 *.wav
+
 ${HOME}/crossfade.sh 4 ${FADE1} ${FADE2}
 sox cfo_${FADE1} cfi_${FADE2} ${FILENAME}.wav || die "Error while concatonating the final files."
 
-[ $DEBUG -eq 0 ] && echo "DEBUG - Concat should be done now..."
+[ ${DEBUG} -eq 0 ] && echo "DEBUG - Concat should be done now..."
 
 echo
 box_out "Converting WAV to 64 kbps MP3 file for upload to FTP site."
@@ -176,6 +197,9 @@ lame -m j -q 2 --resample 22.05 --tt "${TITLE}" --ta "${ARTIST}" --tl "${ALBUM}"
 #/usr/local/bin/mp3info -x ${FILENAME}-64.mp3 | tee ${FILENAME}.txt
 
 if [ ${UPLOAD} -eq 0 ]; then
+	echo
+	box_out "Uploading MP3 to Libsyn FTP Site."
+	echo
 	mv ${FILENAME}-64.mp3 ${FILENAME}.mp3
 	ncftpput -f ${HOME}/libsyn_ftp.conf /daybreak/dropbox/ ${FILENAME}.mp3
 	if [ $? -ne 0 ]; then
@@ -187,7 +211,7 @@ if [ ${UPLOAD} -eq 0 ]; then
 	else
 		echo
 		echo
-		box_out "MP3 upload completed successfully.  You may now post podcast via Libsyn."
+		box_out "Ignore any \"Could not preserve times\" warnings.  MP3 upload completed successfully.  You may now post podcast via Libsyn."
 		echo
 		echo
 	fi
