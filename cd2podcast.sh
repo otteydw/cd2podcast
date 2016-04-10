@@ -2,15 +2,19 @@
 
 PATH="${PATH}"
 
-uname | grep -q "CYGWIN" && OS="CYGWIN" || OS="WINDOWS"
+uname | grep -q "CYGWIN" && MY_OS="CYGWIN" || MY_OS="WINDOWS"
 
-if [ "${OS}" = "CYGWIN" ]; then
-	HOME="/cygdrive/c/cd2podcast"
+UNIX_HOME="/cygdrive/c/cd2podcast"
+WINDOWS_HOME="c:/cd2podcast"
+
+if [ "${MY_OS}" = "CYGWIN" ]; then
+	HOME=${WINDOWS_HOME}
 	DEV="0,1,0"
 else
-	HOME="c:/cd2podcast"
+	HOME=${UNIX_HOME}
 fi
 
+EJECT_WHEN_DONE=0
 URL="http://www.enjoydaybreak.com/"
 ALBUM="Daybreak Community Church"
 COMMENT="${ALBUM} - ${URL}"
@@ -21,7 +25,7 @@ GENRE=101
 UPLOAD=0
 DEBUG=1
 OUTROFILE="${HOME}/intro/daybreak_podcast_outro.wav"
-PODCAST_LOGO="${HOME}/daybreak_podcast_icon.jpg"
+PODCAST_LOGO="${WINDOWS_HOME}/daybreak_podcast_icon.jpg"
 ARCHIVE="${HOME}/archive"
 
 function eject () {
@@ -59,19 +63,21 @@ usage ()
     echo "  -a ARTIST                  specify the artist name"
     echo "  -d DATE STAMP              specify the date stamp in form of YYYYMMDD"
     #echo "  -D DEVICE                  specify the device (/dev/cdrecorder)"
+	echo "  -n                         don't eject the CD automatically when finished"
 	echo "  -T TRACK                   specify a specific track number to rip: START[+END]"
 	echo "  -w WAV file                use a specific wav file instead of ripping from a CD"
 	echo "  -x                         do not upload to the FTP server"
 	echo "  -z                         DEBUG"
 }
 
-while getopts ":t:a:d:D:h?T:w:xz" Option
+while getopts ":t:a:d:D:h?T:w:xzn" Option
 do
   case $Option in
     t   ) TITLE=$OPTARG;;
     a   ) ARTIST=$OPTARG;;
     d   ) TIMESTAMP=$OPTARG;;
     #D   ) DEV=$OPTARG;;
+	n   ) EJECT_WHEN_DONE=1;;
 	T	) TRACK=$OPTARG;;
 	w	) WAV=$OPTARG;;
 	x	) UPLOAD=1;;
@@ -83,13 +89,6 @@ do
 		  exit 1;;
   esac
 done
-
-if [ ${DEBUG} -eq 0 ]; then
-	echo "DEBUG"
-	echo "Artist = $ARTIST"
-	echo "Title = $TITLE"
-	echo "Date = $TIMESTAMP"
-fi	
 
 if [ -z "${TITLE}" ]; then
 	echo -n "Please enter a value for TITLE, without quotes: (eg Juicy Fruit - Gentleness)"
@@ -137,32 +136,33 @@ FILENAME="$TIMESTAMP-`echo $TITLE | sed -e 's| |\_|g' | sed -e 's|\_\-\_|\-|g'`"
 if [ -z $WAV ]; then
 	if [ -z $TRACK ]; then
 		# No tracks specified, lets rip 'em all!
-		if [ "${OS}" = "CYGWIN" ]; then
+		if [ "${MY_OS}" = "CYGWIN" ]; then
 			cdda2wav -B -D ${DEV} --no-infofile ${HOME}/${FILENAME}.wav || die "Error extracting from CD"
 		else
 			cdda2wav -B --no-infofile ${HOME}/${FILENAME}.wav || die "Error extracting from CD"
 		fi
 	else
 		# Rip only the track specified
-		if [ "${OS}" = "CYGWIN" ]; then
+		if [ "${MY_OS}" = "CYGWIN" ]; then
 			cdda2wav -D ${DEV} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		else
 			cdda2wav -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		fi
 		
 	fi
+	echo
+	echo
+	box_out "CD extraction complete.  It is now safe to eject the CD."
+	echo
+	echo
+	if [ $EJECT_WHEN_DONE  -eq 0 ];	then
+		eject
+	fi
 else
 	if [ "${WAV}" != "${FILENAME}.wav" ]; then
 		mv ${WAV} "${FILENAME}.wav"
 	fi
 fi
-
-echo
-echo
-box_out "CD extraction complete.  It is now safe to eject the CD."
-echo
-echo
-eject
 
 case $ARTIST in
 	"David Hakes" ) INTROFILE="${HOME}/intro/Intro_Hakes-Pastor.wav";;
@@ -194,7 +194,7 @@ FADE1="${FILENAME}-intro.wav"
 FADE2="${FILENAME}-no_silence.wav"
 
 # Weird workaround
-[ "${OS}" != "CYGWIN" ] && chmod 664 *.wav
+[ "${MY_OS}" != "CYGWIN" ] && chmod 664 *.wav
 
 ${HOME}/crossfade.sh 4 ${FADE1} ${FADE2}
 sox cfo_${FADE1} cfi_${FADE2} ${FILENAME}.wav || die "Error while concatonating the final files."
