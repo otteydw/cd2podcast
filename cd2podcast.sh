@@ -92,25 +92,42 @@ if [ ${DEBUG} -eq 0 ]; then
 fi	
 
 if [ -z "${TITLE}" ]; then
-	echo "Please enter a value for TITLE."
-	echo
-	usage
-	exit 1
+	echo -n "Please enter a value for TITLE, without quotes: (eg Juicy Fruit - Gentleness)"
+	read  TITLE
+	if [ -z "${TITLE}" ]; then
+		echo
+		usage
+		exit 1
+	fi
 fi
 
 if [ -z "${ARTIST}" ]; then
-	echo "Please enter a value for ARTIST."
-	echo
-	usage
-	exit 1
+	echo -n "Please enter a value for ARTIST, without quotes (eg David Hakes): "
+	read ARTIST
+	if [ -z "${ARTIST}" ]; then
+		echo
+		usage
+		exit 1
+	fi
 fi
 
 if [ -z "${TIMESTAMP}" ]; then
-	echo "Please enter a value for TIMESTAMP."
-	echo
-	usage
-	exit 1
+	echo -n "Please enter a value for TIMESTAMP, without quotes (eg 20150705): "
+	read TIMESTAMP
+	if [ -z "${TIMESTAMP}" ]; then
+		echo
+		usage
+		exit 1
+	fi
 fi
+
+if [ ${DEBUG} -eq 0 ]; then
+	echo "DEBUG"
+	echo "After possible prompts"
+	echo "Artist = $ARTIST"
+	echo "Title = $TITLE"
+	echo "Date = $TIMESTAMP"
+fi	
 
 FILENAME="$TIMESTAMP-`echo $TITLE | sed -e 's| |\_|g' | sed -e 's|\_\-\_|\-|g'`"
 [ ${DEBUG} -eq 0 ] && echo "Filename = ${FILENAME}"
