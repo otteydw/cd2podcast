@@ -6,7 +6,7 @@ Works in bash on Windows.
 Many variables hardcoded specifically for [Daybreak Community Churck}(http://www.enjoydaybreak.com).
 
 Makes use of
-* [box_out](http://unix.stackexchange.com/questions/70615/bash-script-echo-output-in-box}
+* [box_out](http://unix.stackexchange.com/questions/70615/bash-script-echo-output-in-box)
 * [crossfade.sh](https://github.com/rbouqueau/SoX/blob/master/scripts/crossfade.sh)
 * [nircmd](http://www.nirsoft.net/utils/nircmd.html)
 * [cdda2wav](http://www.cdda2wav.de/)
