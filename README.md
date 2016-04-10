@@ -3,7 +3,7 @@ A script to rip a CD and upload it to LibSyn.  Useful for uploading sermon podca
 
 Works in bash on Windows.
 
-Many variables hardcoded specifically for [Daybreak Community Churck}(http://www.enjoydaybreak.com).
+Many variables hardcoded specifically for [Daybreak Community Churck](http://www.enjoydaybreak.com).
 
 Makes use of
 * [box_out](http://unix.stackexchange.com/questions/70615/bash-script-echo-output-in-box)
