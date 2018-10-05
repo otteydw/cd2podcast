@@ -27,9 +27,12 @@ GENRE=101
 #DEV="/dev/cdrom1"
 UPLOAD=0
 DEBUG=1
-OUTROFILE="${HOME}/intro/daybreak_podcast_outro.wav"
-PODCAST_LOGO="${HOME}/daybreak_podcast_icon.jpg"
-ARCHIVE="${HOME}/archive"
+#OUTROFILE="${HOME}/intro/daybreak_podcast_outro.wav"
+#PODCAST_LOGO="${HOME}/daybreak_podcast_icon.jpg"
+#ARCHIVE="${HOME}/archive"
+OUTROFILE="intro/daybreak_podcast_outro.wav"
+PODCAST_LOGO="daybreak_podcast_icon.jpg"
+ARCHIVE="archive"
 
 function eject () {
 	nircmd.exe cdrom open
@@ -142,6 +145,7 @@ FILENAME="$TIMESTAMP-`echo $TITLE | sed -e 's| |\_|g' | sed -e 's|\_\-\_|\-|g'`"
 #exit
 
 cd ${HOME}
+
 if [ -z $WAV ]; then
 	if [ -z $TRACK ]; then
 		# No tracks specified, lets rip 'em all!
