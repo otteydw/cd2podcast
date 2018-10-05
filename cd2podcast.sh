@@ -8,8 +8,10 @@ uname -a | grep -q "Microsoft" && OS="WINUX"
 if [ "${OS}" = "CYGWIN" ]; then
 	HOME="/cygdrive/c/cd2podcast"
 	DEV="0,1,0"
+	CDDA2WAV="cdda2wav"
 elif [ "${OS}" = "WINUX" ]; then
 	HOME="/mnt/c/cd2podcast"
+	CDDA2WAV="cdda2wav.exe"
 else
 	HOME="c:/cd2podcast"
 fi
@@ -140,17 +142,18 @@ FILENAME="$TIMESTAMP-`echo $TITLE | sed -e 's| |\_|g' | sed -e 's|\_\-\_|\-|g'`"
 if [ -z $WAV ]; then
 	if [ -z $TRACK ]; then
 		# No tracks specified, lets rip 'em all!
+		#if [ "${OS}" = "CYGWIN" ] || [ "${OS}" = "WINUX" ]; then
 		if [ "${OS}" = "CYGWIN" ]; then
-			cdda2wav -B -D ${DEV} --no-infofile ${HOME}/${FILENAME}.wav || die "Error extracting from CD"
+			${CDDA2WAV} -B -D ${DEV} --no-infofile ${HOME}/${FILENAME}.wav || die "Error extracting from CD"
 		else
-			cdda2wav -B --no-infofile ${HOME}/${FILENAME}.wav || die "Error extracting from CD"
+			${CDDA2WAV} -B --no-infofile ${HOME}/${FILENAME}.wav || die "Error extracting from CD"
 		fi
 	else
 		# Rip only the track specified
-		if [ "${OS}" = "CYGWIN" ]; then
-			cdda2wav -D ${DEV} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
+		if [ "${OS}" = "CYGWIN" ] || [ "${OS}" = "WINUX" ]; then
+			${CDDA2WAV} -D ${DEV} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		else
-			cdda2wav -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
+			${CDDA2WAV} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		fi
 		
 	fi
@@ -166,7 +169,7 @@ box_out "CD extraction complete.  It is now safe to eject the CD."
 echo
 echo
 eject
-
+exit
 case $ARTIST in
 	"David Hakes" ) INTROFILE="${HOME}/intro/Intro_Hakes-Pastor.wav";;
 	#"Kevin Grando" ) INTROFILE="${HOME}/intro/Intro_Grando.wav";;
