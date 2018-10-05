@@ -17,7 +17,7 @@ fi
 URL="http://www.enjoydaybreak.com/"
 ALBUM="Daybreak Community Church"
 COMMENT="${ALBUM} - ${URL}"
-YEAR=2014
+YEAR=2018
 GENRE=101
 #DEV="/dev/cdrecorder"
 #DEV="/dev/cdrom1"
