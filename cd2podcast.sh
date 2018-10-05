@@ -139,14 +139,15 @@ FILENAME="$TIMESTAMP-`echo $TITLE | sed -e 's| |\_|g' | sed -e 's|\_\-\_|\-|g'`"
 #sleep 60
 #exit
 
+cd ${HOME}
 if [ -z $WAV ]; then
 	if [ -z $TRACK ]; then
 		# No tracks specified, lets rip 'em all!
 		#if [ "${OS}" = "CYGWIN" ] || [ "${OS}" = "WINUX" ]; then
 		if [ "${OS}" = "CYGWIN" ]; then
-			${CDDA2WAV} -B -D ${DEV} --no-infofile ${HOME}/${FILENAME}.wav || die "Error extracting from CD"
+			${CDDA2WAV} -B -D ${DEV} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		else
-			${CDDA2WAV} -B --no-infofile ${HOME}/${FILENAME}.wav || die "Error extracting from CD"
+			${CDDA2WAV} -B --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		fi
 	else
 		# Rip only the track specified
