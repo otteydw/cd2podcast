@@ -177,10 +177,12 @@ else
 fi
 
 case $ARTIST in
-	"David Hakes" ) INTROFILE="${HOME}/intro/Intro_Hakes-Pastor.wav";;
+	#"David Hakes" ) INTROFILE="${HOME}/intro/Intro_Hakes-Pastor.wav";;
+	"David Hakes" ) INTROFILE="intro/Intro_Hakes-Pastor.wav";;
 	#"Kevin Grando" ) INTROFILE="${HOME}/intro/Intro_Grando.wav";;
 	#"Dan Houck" ) INTROFILE="${HOME}/intro/Intro_Houck.wav";;
-	* ) INTROFILE="${HOME}/intro/Intro_Generic.wav";;
+	#* ) INTROFILE="${HOME}/intro/Intro_Generic.wav";;
+	* ) INTROFILE="intro/Intro_Generic.wav";;
 esac
 
 FILE_COUNT=`ls ${FILENAME}_*.wav 2>/dev/null | wc -l`
