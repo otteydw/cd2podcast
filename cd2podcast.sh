@@ -3,11 +3,13 @@
 PATH="${PATH}"
 
 uname | grep -q "CYGWIN" && OS="CYGWIN" || OS="WINDOWS"
-uname -a | grep -q "Microsoft" && OS="Winux"
+uname -a | grep -q "Microsoft" && OS="WINUX"
 
 if [ "${OS}" = "CYGWIN" ]; then
 	HOME="/cygdrive/c/cd2podcast"
 	DEV="0,1,0"
+elif [ "${OS}" = "WINUX" ]; then
+	HOME="/mnt/c/cd2podcast"
 else
 	HOME="c:/cd2podcast"
 fi
