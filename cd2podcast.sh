@@ -28,7 +28,7 @@ PODCAST_LOGO="${HOME}/daybreak_podcast_icon.jpg"
 ARCHIVE="${HOME}/archive"
 
 function eject () {
-	nircmd cdrom open
+	nircmd.exe cdrom open
 }
 
 die ()
