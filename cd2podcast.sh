@@ -9,9 +9,11 @@ if [ "${OS}" = "CYGWIN" ]; then
 	HOME="/cygdrive/c/cd2podcast"
 	DEV="0,1,0"
 	CDDA2WAV="cdda2wav"
+	SOX="sox"
 elif [ "${OS}" = "WINUX" ]; then
 	HOME="/mnt/c/cd2podcast"
 	CDDA2WAV="cdda2wav.exe"
+	SOX="sox.exe"
 else
 	HOME="c:/cd2podcast"
 fi
@@ -143,7 +145,6 @@ cd ${HOME}
 if [ -z $WAV ]; then
 	if [ -z $TRACK ]; then
 		# No tracks specified, lets rip 'em all!
-		#if [ "${OS}" = "CYGWIN" ] || [ "${OS}" = "WINUX" ]; then
 		if [ "${OS}" = "CYGWIN" ]; then
 			${CDDA2WAV} -B -D ${DEV} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		else
@@ -151,7 +152,7 @@ if [ -z $WAV ]; then
 		fi
 	else
 		# Rip only the track specified
-		if [ "${OS}" = "CYGWIN" ] || [ "${OS}" = "WINUX" ]; then
+		if [ "${OS}" = "CYGWIN" ]; then
 			${CDDA2WAV} -D ${DEV} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		else
 			${CDDA2WAV} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
@@ -170,7 +171,7 @@ box_out "CD extraction complete.  It is now safe to eject the CD."
 echo
 echo
 eject
-exit
+
 case $ARTIST in
 	"David Hakes" ) INTROFILE="${HOME}/intro/Intro_Hakes-Pastor.wav";;
 	#"Kevin Grando" ) INTROFILE="${HOME}/intro/Intro_Grando.wav";;
@@ -182,18 +183,20 @@ FILE_COUNT=`ls ${FILENAME}_*.wav 2>/dev/null | wc -l`
 if [ ${FILE_COUNT} -gt 1 ]; then
 	echo "More than one track - splicing them together!"
 	#sox ${INTROFILE} ${FILENAME}_*.wav ${OUTROFILE} ${FILENAME}.wav
-	sox ${FILENAME}_*.wav ${OUTROFILE} ${FILENAME}-no_intro.wav || die "Error concatenating files."
+	${SOX} ${FILENAME}_*.wav ${OUTROFILE} ${FILENAME}-no_intro.wav || die "Error concatenating files."
 else
 	#echo "Skipping"
 	echo "Only one file.  Still have to add the outro."
 	mv ${FILENAME}.wav ${FILENAME}-only.wav
 	#sox -V ${INTROFILE} ${FILENAME}-no_intro.wav ${OUTROFILE} ${FILENAME}.wav
-	sox ${FILENAME}-only.wav ${OUTROFILE} ${FILENAME}-no_intro.wav || die "Error concatenating files."
+	${SOX} ${FILENAME}-only.wav ${OUTROFILE} ${FILENAME}-no_intro.wav || die "Error concatenating files."
 fi
 
 # Remove silence from beginning of audio
-sox ${FILENAME}-no_intro.wav ${FILENAME}-no_silence.wav silence 1 0.3 1% || die "Error while removing silence from beginning of audio."
+${SOX} ${FILENAME}-no_intro.wav ${FILENAME}-no_silence.wav silence 1 0.3 1% || die "Error while removing silence from beginning of audio."
 
+echo "Done with all the SOX"
+exit
 cp ${INTROFILE} ${FILENAME}-intro.wav
 
 # Cross-fade the intro with the audio
