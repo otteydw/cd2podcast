@@ -163,18 +163,18 @@ if [ -z $WAV ]; then
 		fi
 		
 	fi
+	
+	echo
+	echo
+	box_out "CD extraction complete.  It is now safe to eject the CD."
+	echo
+	echo
+	eject
 else
 	if [ "${WAV}" != "${FILENAME}.wav" ]; then
 		mv ${WAV} "${FILENAME}.wav"
 	fi
 fi
-
-echo
-echo
-box_out "CD extraction complete.  It is now safe to eject the CD."
-echo
-echo
-eject
 
 case $ARTIST in
 	"David Hakes" ) INTROFILE="${HOME}/intro/Intro_Hakes-Pastor.wav";;
