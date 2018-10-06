@@ -27,13 +27,8 @@ ALBUM="Daybreak Community Church"
 COMMENT="${ALBUM} - ${URL}"
 YEAR=2018
 GENRE=101
-#DEV="/dev/cdrecorder"
-#DEV="/dev/cdrom1"
 UPLOAD=0
 DEBUG=1
-#OUTROFILE="${HOME}/intro/daybreak_podcast_outro.wav"
-#PODCAST_LOGO="${HOME}/daybreak_podcast_icon.jpg"
-#ARCHIVE="${HOME}/archive"
 OUTROFILE="intro/daybreak_podcast_outro.wav"
 PODCAST_LOGO="daybreak_podcast_icon.jpg"
 ARCHIVE="archive"
@@ -145,8 +140,6 @@ fi
 
 FILENAME="$TIMESTAMP-`echo $TITLE | sed -e 's| |\_|g' | sed -e 's|\_\-\_|\-|g'`"
 [ ${DEBUG} -eq 0 ] && echo "Filename = ${FILENAME}"
-#sleep 60
-#exit
 
 cd ${HOME}
 
@@ -181,24 +174,19 @@ else
 fi
 
 case $ARTIST in
-	#"David Hakes" ) INTROFILE="${HOME}/intro/Intro_Hakes-Pastor.wav";;
 	"David Hakes" ) INTROFILE="intro/Intro_Hakes-Pastor.wav";;
 	#"Kevin Grando" ) INTROFILE="${HOME}/intro/Intro_Grando.wav";;
 	#"Dan Houck" ) INTROFILE="${HOME}/intro/Intro_Houck.wav";;
-	#* ) INTROFILE="${HOME}/intro/Intro_Generic.wav";;
 	* ) INTROFILE="intro/Intro_Generic.wav";;
 esac
 
 FILE_COUNT=`ls ${FILENAME}_*.wav 2>/dev/null | wc -l`
 if [ ${FILE_COUNT} -gt 1 ]; then
 	echo "More than one track - splicing them together!"
-	#sox ${INTROFILE} ${FILENAME}_*.wav ${OUTROFILE} ${FILENAME}.wav
 	${SOX} ${FILENAME}_*.wav ${OUTROFILE} ${FILENAME}-no_intro.wav || die "Error concatenating files."
 else
-	#echo "Skipping"
 	echo "Only one file.  Still have to add the outro."
 	mv ${FILENAME}.wav ${FILENAME}-only.wav
-	#sox -V ${INTROFILE} ${FILENAME}-no_intro.wav ${OUTROFILE} ${FILENAME}.wav
 	${SOX} ${FILENAME}-only.wav ${OUTROFILE} ${FILENAME}-no_intro.wav || die "Error concatenating files."
 fi
 
