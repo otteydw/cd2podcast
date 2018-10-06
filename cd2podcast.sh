@@ -3,10 +3,21 @@
 PATH="${PATH}"
 
 uname | grep -q "CYGWIN" && OS="CYGWIN" || OS="WINDOWS"
+uname -a | grep -q "Microsoft" && OS="WINUX"
 
 if [ "${OS}" = "CYGWIN" ]; then
 	HOME="/cygdrive/c/cd2podcast"
 	DEV="0,1,0"
+	CDDA2WAV="cdda2wav"
+	SOX="sox"
+	LAME="sox"
+	NCFTPPUT="ncftpput"
+elif [ "${OS}" = "WINUX" ]; then
+	HOME="/mnt/c/cd2podcast"
+	CDDA2WAV="cdda2wav.exe"
+	SOX="sox.exe"
+	LAME="lame.exe"
+	NCFTPPUT="ncftpput.exe"
 else
 	HOME="c:/cd2podcast"
 fi
@@ -14,18 +25,16 @@ fi
 URL="http://www.enjoydaybreak.com/"
 ALBUM="Daybreak Community Church"
 COMMENT="${ALBUM} - ${URL}"
-YEAR=2014
+YEAR=2018
 GENRE=101
-#DEV="/dev/cdrecorder"
-#DEV="/dev/cdrom1"
 UPLOAD=0
 DEBUG=1
-OUTROFILE="${HOME}/intro/daybreak_podcast_outro.wav"
-PODCAST_LOGO="${HOME}/daybreak_podcast_icon.jpg"
-ARCHIVE="${HOME}/archive"
+OUTROFILE="intro/daybreak_podcast_outro.wav"
+PODCAST_LOGO="daybreak_podcast_icon.jpg"
+ARCHIVE="archive"
 
 function eject () {
-	nircmd cdrom open
+	nircmd.exe cdrom open
 }
 
 die ()
@@ -131,61 +140,58 @@ fi
 
 FILENAME="$TIMESTAMP-`echo $TITLE | sed -e 's| |\_|g' | sed -e 's|\_\-\_|\-|g'`"
 [ ${DEBUG} -eq 0 ] && echo "Filename = ${FILENAME}"
-#sleep 60
-#exit
+
+cd ${HOME}
 
 if [ -z $WAV ]; then
 	if [ -z $TRACK ]; then
 		# No tracks specified, lets rip 'em all!
 		if [ "${OS}" = "CYGWIN" ]; then
-			cdda2wav -B -D ${DEV} --no-infofile ${HOME}/${FILENAME}.wav || die "Error extracting from CD"
+			${CDDA2WAV} -B -D ${DEV} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		else
-			cdda2wav -B --no-infofile ${HOME}/${FILENAME}.wav || die "Error extracting from CD"
+			${CDDA2WAV} -B --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		fi
 	else
 		# Rip only the track specified
 		if [ "${OS}" = "CYGWIN" ]; then
-			cdda2wav -D ${DEV} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
+			${CDDA2WAV} -D ${DEV} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		else
-			cdda2wav -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
+			${CDDA2WAV} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		fi
 		
 	fi
+	
+	echo
+	echo
+	box_out "CD extraction complete.  It is now safe to eject the CD."
+	echo
+	echo
+	eject
 else
 	if [ "${WAV}" != "${FILENAME}.wav" ]; then
 		mv ${WAV} "${FILENAME}.wav"
 	fi
 fi
 
-echo
-echo
-box_out "CD extraction complete.  It is now safe to eject the CD."
-echo
-echo
-eject
-
 case $ARTIST in
-	"David Hakes" ) INTROFILE="${HOME}/intro/Intro_Hakes-Pastor.wav";;
+	"David Hakes" ) INTROFILE="intro/Intro_Hakes-Pastor.wav";;
 	#"Kevin Grando" ) INTROFILE="${HOME}/intro/Intro_Grando.wav";;
 	#"Dan Houck" ) INTROFILE="${HOME}/intro/Intro_Houck.wav";;
-	* ) INTROFILE="${HOME}/intro/Intro_Generic.wav";;
+	* ) INTROFILE="intro/Intro_Generic.wav";;
 esac
 
 FILE_COUNT=`ls ${FILENAME}_*.wav 2>/dev/null | wc -l`
 if [ ${FILE_COUNT} -gt 1 ]; then
 	echo "More than one track - splicing them together!"
-	#sox ${INTROFILE} ${FILENAME}_*.wav ${OUTROFILE} ${FILENAME}.wav
-	sox ${FILENAME}_*.wav ${OUTROFILE} ${FILENAME}-no_intro.wav || die "Error concatenating files."
+	${SOX} ${FILENAME}_*.wav ${OUTROFILE} ${FILENAME}-no_intro.wav || die "Error concatenating files."
 else
-	#echo "Skipping"
 	echo "Only one file.  Still have to add the outro."
 	mv ${FILENAME}.wav ${FILENAME}-only.wav
-	#sox -V ${INTROFILE} ${FILENAME}-no_intro.wav ${OUTROFILE} ${FILENAME}.wav
-	sox ${FILENAME}-only.wav ${OUTROFILE} ${FILENAME}-no_intro.wav || die "Error concatenating files."
+	${SOX} ${FILENAME}-only.wav ${OUTROFILE} ${FILENAME}-no_intro.wav || die "Error concatenating files."
 fi
 
 # Remove silence from beginning of audio
-sox ${FILENAME}-no_intro.wav ${FILENAME}-no_silence.wav silence 1 0.3 1% || die "Error while removing silence from beginning of audio."
+${SOX} ${FILENAME}-no_intro.wav ${FILENAME}-no_silence.wav silence 1 0.3 1% || die "Error while removing silence from beginning of audio."
 
 cp ${INTROFILE} ${FILENAME}-intro.wav
 
@@ -197,14 +203,15 @@ FADE2="${FILENAME}-no_silence.wav"
 [ "${OS}" != "CYGWIN" ] && chmod 664 *.wav
 
 ${HOME}/crossfade.sh 4 ${FADE1} ${FADE2}
-sox cfo_${FADE1} cfi_${FADE2} ${FILENAME}.wav || die "Error while concatonating the final files."
+
+${SOX} cfo_${FADE1} cfi_${FADE2} ${FILENAME}.wav || die "Error while concatonating the final files."
 
 [ ${DEBUG} -eq 0 ] && echo "DEBUG - Concat should be done now..."
 
 echo
-box_out "Converting WAV to 64 kbps MP3 file for upload to FTP site."
+box_out "Converting WAV to 64 kbps MP3 file for upload to FTP site.  (No progress bar will be shown.)"
 echo
-lame -m j -q 2 --resample 22.05 --tt "${TITLE}" --ta "${ARTIST}" --tl "${ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 64 ${FILENAME}.wav ${FILENAME}-64.mp3 || die "Error while converting wav to 64 kbps mp3"
+${LAME} -S -m j -q 2 --resample 22.05 --tt "${TITLE}" --ta "${ARTIST}" --tl "${ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 64 ${FILENAME}.wav ${FILENAME}-64.mp3 || die "Error while converting wav to 64 kbps mp3"
 
 # Add APIC - logo / picture frame
 #python /usr/local/pytagger-0.5/apic.py ${FILENAME}-64.mp3 $HOME/podcast/daybreak_podcast_icon.jpg
@@ -218,7 +225,7 @@ if [ ${UPLOAD} -eq 0 ]; then
 	box_out "Uploading MP3 to Libsyn FTP Site."
 	echo
 	mv ${FILENAME}-64.mp3 ${FILENAME}.mp3
-	ncftpput -f ${HOME}/libsyn_ftp.conf /daybreak/dropbox/ ${FILENAME}.mp3
+	$NCFTPPUT -f libsyn_ftp.conf /daybreak/dropbox/ ${FILENAME}.mp3
 	if [ $? -ne 0 ]; then
 		echo
 		echo
@@ -236,9 +243,9 @@ if [ ${UPLOAD} -eq 0 ]; then
 fi
 
 echo
-box_out "Converting WAV to 320 kbps MP3 file for higher quality archival."
+box_out "Converting WAV to 320 kbps MP3 file for higher quality archival.  (No progress bar will be shown.)"
 echo
-lame -m j -q 2 --resample 44.1 --tt "${TITLE}" --ta "${ARTIST}" --tl "{$ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 320 ${FILENAME}.wav ${FILENAME}-320.mp3 || die "Error while converting wav to 320 kbps mp3"
+${LAME} -S -m j -q 2 --resample 44.1 --tt "${TITLE}" --ta "${ARTIST}" --tl "{$ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 320 ${FILENAME}.wav ${FILENAME}-320.mp3 || die "Error while converting wav to 320 kbps mp3"
 
 # Add APIC - logo / picture frame
 #python /usr/local/pytagger-0.5/apic.py ${FILENAME}-320.mp3 $HOME/podcast/daybreak_podcast_icon.jpg
