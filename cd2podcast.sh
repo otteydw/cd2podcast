@@ -221,9 +221,9 @@ ${SOX} cfo_${FADE1} cfi_${FADE2} ${FILENAME}.wav || die "Error while concatonati
 [ ${DEBUG} -eq 0 ] && echo "DEBUG - Concat should be done now..."
 
 echo
-box_out "Converting WAV to 64 kbps MP3 file for upload to FTP site."
+box_out "Converting WAV to 64 kbps MP3 file for upload to FTP site.  (No progress bar will be shown.)"
 echo
-${LAME} -m j -q 2 --resample 22.05 --tt "${TITLE}" --ta "${ARTIST}" --tl "${ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 64 ${FILENAME}.wav ${FILENAME}-64.mp3 || die "Error while converting wav to 64 kbps mp3"
+${LAME} -S -m j -q 2 --resample 22.05 --tt "${TITLE}" --ta "${ARTIST}" --tl "${ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 64 ${FILENAME}.wav ${FILENAME}-64.mp3 || die "Error while converting wav to 64 kbps mp3"
 
 # Add APIC - logo / picture frame
 #python /usr/local/pytagger-0.5/apic.py ${FILENAME}-64.mp3 $HOME/podcast/daybreak_podcast_icon.jpg
@@ -255,9 +255,9 @@ if [ ${UPLOAD} -eq 0 ]; then
 fi
 
 echo
-box_out "Converting WAV to 320 kbps MP3 file for higher quality archival."
+box_out "Converting WAV to 320 kbps MP3 file for higher quality archival.  (No progress bar will be shown.)"
 echo
-${LAME} -m j -q 2 --resample 44.1 --tt "${TITLE}" --ta "${ARTIST}" --tl "{$ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 320 ${FILENAME}.wav ${FILENAME}-320.mp3 || die "Error while converting wav to 320 kbps mp3"
+${LAME} -S -m j -q 2 --resample 44.1 --tt "${TITLE}" --ta "${ARTIST}" --tl "{$ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 320 ${FILENAME}.wav ${FILENAME}-320.mp3 || die "Error while converting wav to 320 kbps mp3"
 
 # Add APIC - logo / picture frame
 #python /usr/local/pytagger-0.5/apic.py ${FILENAME}-320.mp3 $HOME/podcast/daybreak_podcast_icon.jpg
