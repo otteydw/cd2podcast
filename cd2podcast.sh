@@ -202,7 +202,7 @@ fi
 ${SOX} ${FILENAME}-no_intro.wav ${FILENAME}-no_silence.wav silence 1 0.3 1% || die "Error while removing silence from beginning of audio."
 
 echo "Done with all the SOX"
-exit
+
 cp ${INTROFILE} ${FILENAME}-intro.wav
 
 # Cross-fade the intro with the audio
@@ -213,8 +213,8 @@ FADE2="${FILENAME}-no_silence.wav"
 [ "${OS}" != "CYGWIN" ] && chmod 664 *.wav
 
 ${HOME}/crossfade.sh 4 ${FADE1} ${FADE2}
-sox cfo_${FADE1} cfi_${FADE2} ${FILENAME}.wav || die "Error while concatonating the final files."
-
+${SOX} cfo_${FADE1} cfi_${FADE2} ${FILENAME}.wav || die "Error while concatonating the final files."
+exit
 [ ${DEBUG} -eq 0 ] && echo "DEBUG - Concat should be done now..."
 
 echo
