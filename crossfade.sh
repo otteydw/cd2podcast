@@ -86,13 +86,15 @@ fi
 echo "crossfade and concatenate files"
 echo
 echo  "Finding length of $first_file..."
-first_length=$($SOX "$first_file" -n stat 2>&1 | grep Length | cut -d : -f 2 | cut -f 1 | sed -e "s| *||g")
+first_length=$($SOX $first_file -n stat 2>&1 | grep Length | cut -d : -f 2 | cut -f 1 | sed -e 's| *||g' -e 's|\r||')
 echo "Length is $first_length seconds"
 
 #echo "first_length = $first_length"
 #echo "fade_length = $fade_length"
-trim_length=$(echo "$first_length - $fade_length" | bc | sed -e "s| *||g")
-crossfade_split_length=$(echo "scale=2; $fade_length / 2.0" | bc | sed -e "s| *||g")
+trim_length=$(echo "$first_length - $fade_length" | bc | sed -e 's| *||g' -e 's|\r||')
+echo "Trim length is $trim_length seconds"
+crossfade_split_length=$(echo "scale=2; $fade_length / 2.0" | bc | sed -e 's| *||g' -e 's|\r||')
+echo "Crossfade split length is $crossfade_split_length seconds"
 
 # Get crossfade section from first file and optionally do the fade out
 echo "Obtaining $fade_length seconds of fade out portion from $first_file..."
@@ -110,8 +112,8 @@ $SOX $first_file -e signed-integer -b 16 fadeout1.wav trim $trim_length $fade_fi
 # of 0.1 was just obtained from trail and error.
 
 if [ "$fade_first" = "auto" ]; then
-    RMS=`$SOX fadeout1.wav 2>&1 -n stat | grep RMS | grep amplitude | cut -d : -f 2 | cut -f 1 | sed -e "s| *||g"`
-    should_fade=`echo "$RMS > 0.1" | bc | sed -e "s| *||g"`
+    RMS=$($SOX fadeout1.wav 2>&1 -n stat | grep RMS | grep amplitude | cut -d : -f 2 | cut -f 1 | sed -e 's| *||g' -e 's|\r||')
+    should_fade=$(echo "$RMS > 0.1" | bc | sed -e 's| *||g' -e 's|\r||')
     if [ $should_fade -eq 0 ]; then
         echo "Auto mode decided not to fadeout with RMS of $RMS"
         fade_first_opts=""
@@ -129,8 +131,8 @@ $SOX "$second_file" -e signed-integer -b 16 fadein1.wav trim 0 $fade_length
 
 # For auto, do similar thing as for fadeout.
 if [ "$fade_second" = "auto" ]; then
-    RMS=`$SOX fadein1.wav 2>&1 -n stat | grep RMS | grep amplitude | cut -d : -f 2 | cut -f 1 | sed -e "s| *||g"`
-    should_fade=`echo "$RMS > 0.1" | bc | sed -e "s| *||g"`
+    RMS=$($SOX fadein1.wav 2>&1 -n stat | grep RMS | grep amplitude | cut -d : -f 2 | cut -f 1 | sed -e 's| *||g' -e 's|\r||')
+    should_fade=$(echo "$RMS > 0.1" | bc | sed -e 's| *||g' -e 's|\r||')
     if [ $should_fade -eq 0 ]; then
         echo "Auto mode decided not to fadein with RMS of $RMS"
         fade_second_opts=""
@@ -164,7 +166,7 @@ $SOX crossfade2.wav song2.wav "cfi_${second_file}"
 
 echo -e "Removing temporary files...\n" 
 rm fadeout1.wav fadeout2.wav fadein1.wav fadein2.wav crossfade.wav crossfade1.wav crossfade2.wav song1.wav song2.wav
-mins=`echo "$trim_length / 60" | bc | sed -e "s| *||g"`
-secs=`echo "$trim_length % 60" | bc | sed -e "s| *||g"`
+mins=$(echo "$trim_length / 60" | bc | sed -e 's| *||g' -e 's|\r||')
+secs=$(echo "$trim_length % 60" | bc | sed -e 's| *||g' -e 's|\r||')
 echo "The crossfade occurs at around $mins mins $secs secs in $first_file"
 
