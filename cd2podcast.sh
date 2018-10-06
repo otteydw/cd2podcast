@@ -10,10 +10,14 @@ if [ "${OS}" = "CYGWIN" ]; then
 	DEV="0,1,0"
 	CDDA2WAV="cdda2wav"
 	SOX="sox"
+	LAME="sox"
+	NCFTPPUT="ncftpput"
 elif [ "${OS}" = "WINUX" ]; then
 	HOME="/mnt/c/cd2podcast"
 	CDDA2WAV="cdda2wav.exe"
 	SOX="sox.exe"
+	LAME="lame.exe"
+	NCFTPPUT="ncftpput.exe"
 else
 	HOME="c:/cd2podcast"
 fi
@@ -201,8 +205,6 @@ fi
 # Remove silence from beginning of audio
 ${SOX} ${FILENAME}-no_intro.wav ${FILENAME}-no_silence.wav silence 1 0.3 1% || die "Error while removing silence from beginning of audio."
 
-echo "Done with all the SOX"
-
 cp ${INTROFILE} ${FILENAME}-intro.wav
 
 # Cross-fade the intro with the audio
@@ -213,14 +215,15 @@ FADE2="${FILENAME}-no_silence.wav"
 [ "${OS}" != "CYGWIN" ] && chmod 664 *.wav
 
 ${HOME}/crossfade.sh 4 ${FADE1} ${FADE2}
+
 ${SOX} cfo_${FADE1} cfi_${FADE2} ${FILENAME}.wav || die "Error while concatonating the final files."
-exit
+
 [ ${DEBUG} -eq 0 ] && echo "DEBUG - Concat should be done now..."
 
 echo
 box_out "Converting WAV to 64 kbps MP3 file for upload to FTP site."
 echo
-lame -m j -q 2 --resample 22.05 --tt "${TITLE}" --ta "${ARTIST}" --tl "${ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 64 ${FILENAME}.wav ${FILENAME}-64.mp3 || die "Error while converting wav to 64 kbps mp3"
+${LAME} -m j -q 2 --resample 22.05 --tt "${TITLE}" --ta "${ARTIST}" --tl "${ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 64 ${FILENAME}.wav ${FILENAME}-64.mp3 || die "Error while converting wav to 64 kbps mp3"
 
 # Add APIC - logo / picture frame
 #python /usr/local/pytagger-0.5/apic.py ${FILENAME}-64.mp3 $HOME/podcast/daybreak_podcast_icon.jpg
@@ -234,7 +237,7 @@ if [ ${UPLOAD} -eq 0 ]; then
 	box_out "Uploading MP3 to Libsyn FTP Site."
 	echo
 	mv ${FILENAME}-64.mp3 ${FILENAME}.mp3
-	ncftpput -f ${HOME}/libsyn_ftp.conf /daybreak/dropbox/ ${FILENAME}.mp3
+	$NCFTPPUT -f libsyn_ftp.conf /daybreak/dropbox/ ${FILENAME}.mp3
 	if [ $? -ne 0 ]; then
 		echo
 		echo
@@ -254,7 +257,7 @@ fi
 echo
 box_out "Converting WAV to 320 kbps MP3 file for higher quality archival."
 echo
-lame -m j -q 2 --resample 44.1 --tt "${TITLE}" --ta "${ARTIST}" --tl "{$ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 320 ${FILENAME}.wav ${FILENAME}-320.mp3 || die "Error while converting wav to 320 kbps mp3"
+${LAME} -m j -q 2 --resample 44.1 --tt "${TITLE}" --ta "${ARTIST}" --tl "{$ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 320 ${FILENAME}.wav ${FILENAME}-320.mp3 || die "Error while converting wav to 320 kbps mp3"
 
 # Add APIC - logo / picture frame
 #python /usr/local/pytagger-0.5/apic.py ${FILENAME}-320.mp3 $HOME/podcast/daybreak_podcast_icon.jpg
