@@ -4,4 +4,4 @@ intro
 libsyn_ftp.conf
 *.wav
 *.lnk
-cdda2wav*
+bin

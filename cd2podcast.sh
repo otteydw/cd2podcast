@@ -14,10 +14,11 @@ if [ "${OS}" = "CYGWIN" ]; then
 	NCFTPPUT="ncftpput"
 elif [ "${OS}" = "WINUX" ]; then
 	HOME="/mnt/c/cd2podcast"
-	CDDA2WAV="cdda2wav.exe"
-	SOX="sox.exe"
-	LAME="lame.exe"
-	NCFTPPUT="ncftpput.exe"
+	CDDA2WAV="${HOME}/bin/cdda2wav.exe"
+	NIRCMD="${HOME}/bin/nircmd.exe"
+	SOX="sox"
+	LAME="lame"
+	NCFTPPUT="ncftpput"
 else
 	HOME="c:/cd2podcast"
 fi
@@ -25,16 +26,17 @@ fi
 URL="http://www.enjoydaybreak.com/"
 ALBUM="Daybreak Community Church"
 COMMENT="${ALBUM} - ${URL}"
-YEAR=2018
+YEAR=2019
 GENRE=101
 UPLOAD=0
 DEBUG=1
 OUTROFILE="intro/daybreak_podcast_outro.wav"
 PODCAST_LOGO="daybreak_podcast_icon.jpg"
 ARCHIVE="archive"
+LIBSYN_CONF="libsyn_ftp.conf"
 
 function eject () {
-	nircmd.exe cdrom open
+	${NIRCMD} cdrom open
 }
 
 die ()
@@ -92,6 +94,15 @@ do
 		  exit 1;;
   esac
 done
+
+which ${SOX} > /dev/null 2>&1 || die "sox is not installed!"
+which ${LAME} > /dev/null 2>&1 || die "lame is not installed!"
+which ${CDDA2WAV} > /dev/null 2>&1 || die "cdda2wav / cdrtools is not installed!"
+which ${NCFTPPUT} > /dev/null 2>&1 || die "ncftp is not installed!"
+
+[ -f ${LIBSYN_CONF} ] || die "Libsyn FTP conf file ${LIBSYN_CONF} does not exist."
+
+mkdir -p ${ARCHIVE} || die "Unable to make archive folder ${ARCHIVE}."
 
 if [ ${DEBUG} -eq 0 ]; then
 	echo "DEBUG"
@@ -209,9 +220,9 @@ ${SOX} cfo_${FADE1} cfi_${FADE2} ${FILENAME}.wav || die "Error while concatonati
 [ ${DEBUG} -eq 0 ] && echo "DEBUG - Concat should be done now..."
 
 echo
-box_out "Converting WAV to 64 kbps MP3 file for upload to FTP site.  (No progress bar will be shown.)"
+box_out "Converting WAV to 64 kbps MP3 file for upload to FTP site."
 echo
-${LAME} -S -m j -q 2 --resample 22.05 --tt "${TITLE}" --ta "${ARTIST}" --tl "${ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 64 ${FILENAME}.wav ${FILENAME}-64.mp3 || die "Error while converting wav to 64 kbps mp3"
+${LAME} -m j -q 2 --resample 22.05 --tt "${TITLE}" --ta "${ARTIST}" --tl "${ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 64 ${FILENAME}.wav ${FILENAME}-64.mp3 || die "Error while converting wav to 64 kbps mp3"
 
 # Add APIC - logo / picture frame
 #python /usr/local/pytagger-0.5/apic.py ${FILENAME}-64.mp3 $HOME/podcast/daybreak_podcast_icon.jpg
@@ -243,9 +254,9 @@ if [ ${UPLOAD} -eq 0 ]; then
 fi
 
 echo
-box_out "Converting WAV to 320 kbps MP3 file for higher quality archival.  (No progress bar will be shown.)"
+box_out "Converting WAV to 320 kbps MP3 file for higher quality archival."
 echo
-${LAME} -S -m j -q 2 --resample 44.1 --tt "${TITLE}" --ta "${ARTIST}" --tl "{$ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 320 ${FILENAME}.wav ${FILENAME}-320.mp3 || die "Error while converting wav to 320 kbps mp3"
+${LAME} -m j -q 2 --resample 44.1 --tt "${TITLE}" --ta "${ARTIST}" --tl "{$ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 320 ${FILENAME}.wav ${FILENAME}-320.mp3 || die "Error while converting wav to 320 kbps mp3"
 
 # Add APIC - logo / picture frame
 #python /usr/local/pytagger-0.5/apic.py ${FILENAME}-320.mp3 $HOME/podcast/daybreak_podcast_icon.jpg
