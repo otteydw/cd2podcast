@@ -13,7 +13,7 @@ if [ "${OS}" = "CYGWIN" ]; then
 	LAME="sox"
 	NCFTPPUT="ncftpput"
 elif [ "${OS}" = "WINUX" ]; then
-	HOME="/mnt/c/cd2podcast"
+	HOME="/home/enjoy/cd2podcast"
 	CDDA2WAV="${HOME}/bin/cdda2wav.exe"
 	NIRCMD="${HOME}/bin/nircmd.exe"
 	SOX="sox"
@@ -30,10 +30,11 @@ YEAR=2019
 GENRE=101
 UPLOAD=0
 DEBUG=1
-OUTROFILE="intro/daybreak_podcast_outro.wav"
-PODCAST_LOGO="daybreak_podcast_icon.jpg"
-ARCHIVE="archive"
-LIBSYN_CONF="libsyn_ftp.conf"
+OUTROFILE="${HOME}/intro/daybreak_podcast_outro.wav"
+PODCAST_LOGO="${HOME}/daybreak_podcast_icon.jpg"
+ARCHIVE="${HOME}/archive"
+LIBSYN_CONF="${HOME}/libsyn_ftp.conf"
+TEMP="${HOME}/temp/"
 
 function eject () {
 	${NIRCMD} cdrom open
@@ -103,6 +104,8 @@ which ${NCFTPPUT} > /dev/null 2>&1 || die "ncftp is not installed!"
 [ -f ${LIBSYN_CONF} ] || die "Libsyn FTP conf file ${LIBSYN_CONF} does not exist."
 
 mkdir -p ${ARCHIVE} || die "Unable to make archive folder ${ARCHIVE}."
+mkdir -p ${TEMP} || die "Unable to make temp folder ${TEMP}."
+/bin/rm -rf ${TEMP}/* || die "Unable to cleanup the temp folder ${TEMP}."
 
 if [ ${DEBUG} -eq 0 ]; then
 	echo "DEBUG"
@@ -152,7 +155,7 @@ fi
 FILENAME="$TIMESTAMP-`echo $TITLE | sed -e 's| |\_|g' | sed -e 's|\_\-\_|\-|g'`"
 [ ${DEBUG} -eq 0 ] && echo "Filename = ${FILENAME}"
 
-cd ${HOME}
+cd ${TEMP}
 
 if [ -z $WAV ]; then
 	if [ -z $TRACK ]; then
@@ -185,10 +188,10 @@ else
 fi
 
 case $ARTIST in
-	"David Hakes" ) INTROFILE="intro/Intro_Hakes-Pastor.wav";;
+	"David Hakes" ) INTROFILE="${HOME}/intro/Intro_Hakes-Pastor.wav";;
 	#"Kevin Grando" ) INTROFILE="${HOME}/intro/Intro_Grando.wav";;
 	#"Dan Houck" ) INTROFILE="${HOME}/intro/Intro_Houck.wav";;
-	* ) INTROFILE="intro/Intro_Generic.wav";;
+	* ) INTROFILE="${HOME}/intro/Intro_Generic.wav";;
 esac
 
 FILE_COUNT=`ls ${FILENAME}_*.wav 2>/dev/null | wc -l`
@@ -224,19 +227,14 @@ box_out "Converting WAV to 64 kbps MP3 file for upload to FTP site."
 echo
 ${LAME} -m j -q 2 --resample 22.05 --tt "${TITLE}" --ta "${ARTIST}" --tl "${ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 64 ${FILENAME}.wav ${FILENAME}-64.mp3 || die "Error while converting wav to 64 kbps mp3"
 
-# Add APIC - logo / picture frame
-#python /usr/local/pytagger-0.5/apic.py ${FILENAME}-64.mp3 $HOME/podcast/daybreak_podcast_icon.jpg
-
 [ ${DEBUG} -eq 0 ] && ls -l ${FILENAME}*
-
-#/usr/local/bin/mp3info -x ${FILENAME}-64.mp3 | tee ${FILENAME}.txt
 
 if [ ${UPLOAD} -eq 0 ]; then
 	echo
 	box_out "Uploading MP3 to Libsyn FTP Site."
 	echo
 	mv ${FILENAME}-64.mp3 ${FILENAME}.mp3
-	$NCFTPPUT -f libsyn_ftp.conf /daybreak/dropbox/ ${FILENAME}.mp3
+	$NCFTPPUT -f ${LIBSYN_CONF} /daybreak/dropbox/ ${FILENAME}.mp3
 	if [ $? -ne 0 ]; then
 		echo
 		echo
@@ -258,11 +256,6 @@ box_out "Converting WAV to 320 kbps MP3 file for higher quality archival."
 echo
 ${LAME} -m j -q 2 --resample 44.1 --tt "${TITLE}" --ta "${ARTIST}" --tl "{$ALBUM}" --ty ${YEAR} --tc "${COMMENT}" --tg ${GENRE} --ti ${PODCAST_LOGO} --add-id3v2 -b 320 ${FILENAME}.wav ${FILENAME}-320.mp3 || die "Error while converting wav to 320 kbps mp3"
 
-# Add APIC - logo / picture frame
-#python /usr/local/pytagger-0.5/apic.py ${FILENAME}-320.mp3 $HOME/podcast/daybreak_podcast_icon.jpg
-
-#MEDIA_URL="http://media.libsyn.com/media/daybreak/${FILENAME}.mp3"
-
 echo "Moving newly created MP3s into local archive."
 mv ${FILENAME}*.mp3 ${ARCHIVE}
 
@@ -275,13 +268,6 @@ box_out "All processing is now complete."
 echo
 echo
 
-# ID3 tag options
-#
-# --tt title
-# --ta artist
-# --tl album
-# --ty year
-# --tc comment
-# --tg genre  (101 Speech)
-# --add-id3v2
+cd - > /dev/null
+
 

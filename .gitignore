@@ -1,8 +1,11 @@
 archive
+bin
+cd2podcast-pastethistext.txt
 daybreak_podcast_icon.jpg
 intro
 libsyn_ftp.conf
+temp
+*.doc
+*.docx
 *.wav
 *.lnk
-bin
-DaybreakDocs
