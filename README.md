@@ -5,6 +5,7 @@ Works in bash on Windows.
 
 Many variables hardcoded specifically for [Daybreak Community Church](http://www.enjoydaybreak.com).
 
+To make sure you have all the necessary packages installed on Ubuntu prior to use, run `sudo ./ubuntu_setup.sh`
 Makes use of
 * [box_out](http://unix.stackexchange.com/questions/70615/bash-script-echo-output-in-box)
 * [crossfade.sh](https://github.com/rbouqueau/SoX/blob/master/scripts/crossfade.sh)
