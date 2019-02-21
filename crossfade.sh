@@ -35,8 +35,9 @@
 #
 
 uname | grep -q "CYGWIN" && MY_OS="CYGWIN" || MY_OS="WINDOWS"
+uname -a | grep -q "Microsoft" && MY_OS="WINUX"
 
-if [ "${MY_OS}" = "CYGWIN" ]; then
+if [ "${MY_OS}" = "CYGWIN" ] || [ "${MY_OS}" = "WINUX" ]; then
 	SOX="/usr/bin/sox"
 else
 	SOX="sox.exe"
