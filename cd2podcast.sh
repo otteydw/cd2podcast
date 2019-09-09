@@ -44,7 +44,7 @@ ARCHIVE="${HOME}/archive"
 LIBSYN_CONF="${HOME}/libsyn_ftp.conf"
 TEMP="${HOME}/temp/"
 
-/bin/which eject || function eject () {
+/bin/which eject >/dev/null 2>&1 || function eject () {
 	${NIRCMD} cdrom open
 }
 
