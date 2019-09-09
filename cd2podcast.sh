@@ -27,9 +27,11 @@ elif [ "${OS}" = "LINUX" ]; then
 	SOX="sox"
 	LAME="lame"
 	NCFTPPUT="ncftpput"
+	DEV=/dev/sg0
 else
 	HOME="c:/cd2podcast"
 fi
+
 
 URL="http://www.enjoydaybreak.com/"
 ALBUM="Daybreak Community Church"
@@ -109,6 +111,8 @@ which ${LAME} > /dev/null 2>&1 || die "lame is not installed!"
 which ${CDDA2WAV} > /dev/null 2>&1 || die "cdda2wav / cdrtools is not installed!"
 which ${NCFTPPUT} > /dev/null 2>&1 || die "ncftp is not installed!"
 
+[ ! -z "${DEV}" ] && DEV_OPTION="-D ${DEV}" || DEV_OPTION=""
+
 [ -f ${LIBSYN_CONF} ] || die "Libsyn FTP conf file ${LIBSYN_CONF} does not exist."
 
 mkdir -p ${ARCHIVE} || die "Unable to make archive folder ${ARCHIVE}."
@@ -171,7 +175,7 @@ if [ -z $WAV ]; then
 		if [ "${OS}" = "CYGWIN" ]; then
 			${CDDA2WAV} -B -D ${DEV} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		else
-			${CDDA2WAV} -B --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
+			${CDDA2WAV} -B ${DEV_OPTION} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		fi
 	else
 		# Rip only the track specified
