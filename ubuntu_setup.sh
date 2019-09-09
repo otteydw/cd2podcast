@@ -19,3 +19,5 @@ echo "Installing required packages."
 apt-get -y install sox lame ncftp
 
 uname -a | grep -q ^Linux && apt-get -y install cdda2wav
+
+chmod +x cd2podcast.sh crossfade.sh
