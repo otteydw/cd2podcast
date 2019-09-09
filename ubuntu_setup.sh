@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ $EUID -ne 0 ]]; then
-   echo "This script must be run as root.  Try: sudo $0" 
+   echo "This script must be run as root.  Try: sudo $0"
    exit 1
 fi
 
@@ -17,3 +17,5 @@ echo
 
 echo "Installing required packages."
 apt-get -y install sox lame ncftp
+
+uname -a | grep -q ^Linux && apt-get -y install cdda2wav
