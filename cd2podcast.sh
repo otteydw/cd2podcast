@@ -4,6 +4,7 @@ PATH="${PATH}"
 
 uname | grep -q "CYGWIN" && OS="CYGWIN" || OS="WINDOWS"
 uname -a | grep -q "Microsoft" && OS="WINUX"
+uname -a | grep -q "^Linux" && OS="LINUX"
 
 if [ "${OS}" = "CYGWIN" ]; then
 	HOME="/cygdrive/c/cd2podcast"
@@ -16,6 +17,13 @@ elif [ "${OS}" = "WINUX" ]; then
 	HOME="/home/enjoy/cd2podcast"
 	CDDA2WAV="${HOME}/bin/cdda2wav.exe"
 	NIRCMD="${HOME}/bin/nircmd.exe"
+	SOX="sox"
+	LAME="lame"
+	NCFTPPUT="ncftpput"
+elif [ "${OS}" = "LINUX" ]; then
+	HOME="/home/dottey/git/cd2podcast"
+	CDDA2WAV="cdda2wav"
+	# NIRCMD="${HOME}/bin/nircmd.exe"
 	SOX="sox"
 	LAME="lame"
 	NCFTPPUT="ncftpput"
@@ -36,7 +44,7 @@ ARCHIVE="${HOME}/archive"
 LIBSYN_CONF="${HOME}/libsyn_ftp.conf"
 TEMP="${HOME}/temp/"
 
-function eject () {
+/bin/which eject || function eject () {
 	${NIRCMD} cdrom open
 }
 
@@ -112,7 +120,7 @@ if [ ${DEBUG} -eq 0 ]; then
 	echo "Artist = $ARTIST"
 	echo "Title = $TITLE"
 	echo "Date = $TIMESTAMP"
-fi	
+fi
 
 if [ -z "${TITLE}" ]; then
 	echo -n "Please enter a value for TITLE, without quotes: (eg Juicy Fruit - Gentleness)"
@@ -150,7 +158,7 @@ if [ ${DEBUG} -eq 0 ]; then
 	echo "Artist = $ARTIST"
 	echo "Title = $TITLE"
 	echo "Date = $TIMESTAMP"
-fi	
+fi
 
 FILENAME="$TIMESTAMP-`echo $TITLE | sed -e 's| |\_|g' | sed -e 's|\_\-\_|\-|g'`"
 [ ${DEBUG} -eq 0 ] && echo "Filename = ${FILENAME}"
@@ -172,9 +180,9 @@ if [ -z $WAV ]; then
 		else
 			${CDDA2WAV} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 		fi
-		
+
 	fi
-	
+
 	echo
 	echo
 	box_out "CD extraction complete.  It is now safe to eject the CD."
@@ -269,5 +277,3 @@ echo
 echo
 
 cd - > /dev/null
-
-
