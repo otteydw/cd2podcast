@@ -172,19 +172,10 @@ cd ${TEMP}
 if [ -z $WAV ]; then
 	if [ -z $TRACK ]; then
 		# No tracks specified, lets rip 'em all!
-		if [ "${OS}" = "CYGWIN" ]; then
-			${CDDA2WAV} -B -D ${DEV} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
-		else
-			${CDDA2WAV} -B ${DEV_OPTION} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
-		fi
+		${CDDA2WAV} -B ${DEV_OPTION} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 	else
 		# Rip only the track specified
-		if [ "${OS}" = "CYGWIN" ]; then
-			${CDDA2WAV} -D ${DEV} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
-		else
-			${CDDA2WAV} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
-		fi
-
+		${CDDA2WAV} ${DEV_OPTION} -t ${TRACK} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
 	fi
 
 	echo
