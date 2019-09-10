@@ -115,6 +115,8 @@ which ${NCFTPPUT} > /dev/null 2>&1 || die "ncftp is not installed!"
 
 [ -f ${LIBSYN_CONF} ] || die "Libsyn FTP conf file ${LIBSYN_CONF} does not exist."
 
+[ -f ${PODCAST_LOGO} ] || die "Podcast logo file ${PODCAST_LOGO} does not exist."
+
 mkdir -p ${ARCHIVE} || die "Unable to make archive folder ${ARCHIVE}."
 mkdir -p ${TEMP} || die "Unable to make temp folder ${TEMP}."
 /bin/rm -rf ${TEMP}/* || die "Unable to cleanup the temp folder ${TEMP}."
@@ -183,7 +185,7 @@ if [ -z $WAV ]; then
 	box_out "CD extraction complete.  It is now safe to eject the CD."
 	echo
 	echo
-	eject
+	# eject
 else
 	if [ "${WAV}" != "${FILENAME}.wav" ]; then
 		mv ${WAV} "${FILENAME}.wav"
