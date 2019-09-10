@@ -36,8 +36,9 @@
 
 uname | grep -q "CYGWIN" && MY_OS="CYGWIN" || MY_OS="WINDOWS"
 uname -a | grep -q "Microsoft" && MY_OS="WINUX"
+uname -a | grep -q "^Linux" && MY_OS="LINUX"
 
-if [ "${MY_OS}" = "CYGWIN" ] || [ "${MY_OS}" = "WINUX" ]; then
+if [ "${MY_OS}" = "CYGWIN" ] || [ "${MY_OS}" = "WINUX" ] || [ "${MY_OS}" = "LINUX" ]; then
 	SOX="/usr/bin/sox"
 else
 	SOX="sox.exe"
@@ -165,9 +166,8 @@ echo "Creating crossfade files"
 $SOX song1.wav crossfade1.wav "cfo_${first_file}"
 $SOX crossfade2.wav song2.wav "cfi_${second_file}"
 
-echo -e "Removing temporary files...\n" 
+echo -e "Removing temporary files...\n"
 rm fadeout1.wav fadeout2.wav fadein1.wav fadein2.wav crossfade.wav crossfade1.wav crossfade2.wav song1.wav song2.wav
 mins=$(echo "$trim_length / 60" | bc | sed -e 's| *||g' -e 's|\r||')
 secs=$(echo "$trim_length % 60" | bc | sed -e 's| *||g' -e 's|\r||')
 echo "The crossfade occurs at around $mins mins $secs secs in $first_file"
-
