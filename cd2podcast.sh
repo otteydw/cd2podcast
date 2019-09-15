@@ -2,9 +2,9 @@
 
 PATH="${PATH}"
 
+uname -a | grep -q "^Linux" && OS="LINUX"
 uname | grep -q "CYGWIN" && OS="CYGWIN" || OS="WINDOWS"
 uname -a | grep -q "Microsoft" && OS="WINUX"
-uname -a | grep -q "^Linux" && OS="LINUX"
 
 if [ "${OS}" = "CYGWIN" ]; then
 	HOME="/cygdrive/c/cd2podcast"
@@ -15,7 +15,7 @@ if [ "${OS}" = "CYGWIN" ]; then
 	NCFTPPUT="ncftpput"
 elif [ "${OS}" = "WINUX" ]; then
 	HOME="/home/enjoy/cd2podcast"
-	CDDA2WAV="${HOME}/bin/cdda2wav.exe"
+	CDDA2WAV="bin/cdda2wav.exe"
 	NIRCMD="${HOME}/bin/nircmd.exe"
 	SOX="sox"
 	LAME="lame"
@@ -31,7 +31,6 @@ elif [ "${OS}" = "LINUX" ]; then
 else
 	HOME="c:/cd2podcast"
 fi
-
 
 URL="http://www.enjoydaybreak.com/"
 ALBUM="Daybreak Community Church"
@@ -106,9 +105,11 @@ do
   esac
 done
 
+[ $DEBUG ] && echo "OS is ${OS}"
+
 which ${SOX} > /dev/null 2>&1 || die "sox is not installed!"
 which ${LAME} > /dev/null 2>&1 || die "lame is not installed!"
-which ${CDDA2WAV} > /dev/null 2>&1 || die "cdda2wav / cdrtools is not installed!"
+which ${CDDA2WAV} > /dev/null 2>&1 || die "Could not find ${CDDA2WAV}.  cdda2wav / cdrtools is not installed!"
 which ${NCFTPPUT} > /dev/null 2>&1 || die "ncftp is not installed!"
 
 [ ! -z "${DEV}" ] && DEV_OPTION="-D ${DEV}" || DEV_OPTION=""
@@ -172,6 +173,7 @@ FILENAME="$TIMESTAMP-`echo $TITLE | sed -e 's| |\_|g' | sed -e 's|\_\-\_|\-|g'`"
 cd ${TEMP}
 
 if [ -z $WAV ]; then
+	cd ${HOME}
 	if [ -z $TRACK ]; then
 		# No tracks specified, lets rip 'em all!
 		${CDDA2WAV} -B ${DEV_OPTION} --no-infofile ${FILENAME}.wav || die "Error extracting from CD"
