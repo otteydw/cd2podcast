@@ -1,21 +1,22 @@
 # import subprocess
 import os
 from tkinter import *
+from tkinter import messagebox
 
 window = Tk()
 
 window.title("Daybreak Community Church Podcast Uploader")
-
 window.geometry('700x200')
 
-FONT="Arial Bold"
-FONT_SIZE=20
+FONT = "Arial Bold"
+FONT_SIZE = 20
 
 # Title
 lblTitle = Label(window, font=(FONT, FONT_SIZE), text="Title")
 lblTitle.grid(column=0, row=0)
 txtTitle = Entry(window, font=(FONT, FONT_SIZE), width=30)
 txtTitle.grid(column=1, row=0)
+txtTitle.focus()
 
 # Speaker (aka Artist)
 lblSpeaker = Label(window, font=(FONT, FONT_SIZE), text="Speaker")
@@ -34,13 +35,15 @@ def run_cd2podcast():
     message_speaker = txtSpeaker.get()
     message_date = txtDate.get()
 
-    # cmd = ['./cd2podcast.sh','-t', messageTitle, '-a', messageSpeaker, '-d', messageDate]
     cmd = './cd2podcast.sh -t ' + message_title + ' -a ' + message_speaker + ' -d ' + message_date
     print(cmd)
     return_code = os.WEXITSTATUS(os.system(cmd))
 
-    # res = "Welcome to " + txt.get()
-    # lbl.configure(text= res)
+    if return_code == 0:
+        messagebox.showinfo('Success!', 'Success!')
+        sys.exit()
+    else:
+        messagebox.showinfo('Fail!', 'Fail!')
 
 btnGo = Button(window, font=(FONT, FONT_SIZE), text="Go!", command=run_cd2podcast)
 btnGo.grid(column=1, row=4)
