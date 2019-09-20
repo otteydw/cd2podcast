@@ -22,6 +22,7 @@ txtTitle.focus()
 lblSpeaker = Label(window, font=(FONT, FONT_SIZE), text="Speaker")
 lblSpeaker.grid(column=0, row=1)
 txtSpeaker = Entry(window,font=(FONT, FONT_SIZE), width=30)
+txtSpeaker.insert(0, 'David Hakes')
 txtSpeaker.grid(column=1, row=1)
 
 # Date
