@@ -1,3 +1,5 @@
+# import subprocess
+import os
 from tkinter import *
 
 window = Tk()
@@ -27,13 +29,20 @@ lblDate.grid(column=0, row=2)
 txtDate = Entry(window,font=(FONT, FONT_SIZE), width=30)
 txtDate.grid(column=1, row=2)
 
-def clicked():
-    cmd = './cd2podcast.sh -t ' + txtTitle.get() + ' -a ' + txtSpeaker.get() + ' -d ' + txtDate.get()
+def run_cd2podcast():
+    message_title = txtTitle.get()
+    message_speaker = txtSpeaker.get()
+    message_date = txtDate.get()
+
+    # cmd = ['./cd2podcast.sh','-t', messageTitle, '-a', messageSpeaker, '-d', messageDate]
+    cmd = './cd2podcast.sh -t ' + message_title + ' -a ' + message_speaker + ' -d ' + message_date
     print(cmd)
+    return_code = os.WEXITSTATUS(os.system(cmd))
+
     # res = "Welcome to " + txt.get()
     # lbl.configure(text= res)
 
-btnGo = Button(window, font=(FONT, FONT_SIZE), text="Go!", command=clicked)
+btnGo = Button(window, font=(FONT, FONT_SIZE), text="Go!", command=run_cd2podcast)
 btnGo.grid(column=1, row=4)
 
 window.mainloop()
